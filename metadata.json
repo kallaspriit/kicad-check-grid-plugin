@@ -12,7 +12,9 @@
         }
     },
     "license": "MIT",
-    "resources": {},
+    "resources": {
+        "homepage": "https://github.com/kallaspriit/check-grid-plugin"
+    },
     "versions": [
         {
             "version": "1.0.0",
