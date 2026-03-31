@@ -4,6 +4,7 @@ Checks vias and components against a user-defined grid
 """
 
 import math
+import os
 import pcbnew
 
 
@@ -20,7 +21,7 @@ class CheckGridPlugin(pcbnew.ActionPlugin):
         self.category = "Grid Tools"
         self.description = "Check vias and/or components against custom grid"
         self.show_toolbar_button = True
-        self.icon_file_name = "icon.png"
+        self.icon_file_name = os.path.join(os.path.dirname(__file__), "icon.png")
     
     def is_on_grid(self, value_mm, grid_size):
         """Check if a value in mm is on the specified grid"""
@@ -92,32 +93,13 @@ class CheckGridPlugin(pcbnew.ActionPlugin):
             print(f"Warning: Could not create marker at {pos_mm}: {e}")
             return False
     
-    def make_user9_visible(self):
-        """Make User.9 layer visible so markers can be seen"""
-        try:
-            board = pcbnew.GetBoard()
-            if not board:
-                return
-            
-            # Get the layer settings
-            layer_set = board.GetVisibleLayers()
-            
-            # Add User.9 layer to visible layers if not already visible
-            if not layer_set.Contains(pcbnew.User_9):
-                layer_set.addLayer(pcbnew.User_9)
-                board.SetVisibleLayers(layer_set)
-                print("Made User.9 layer visible to show markers")
-                
-        except Exception as e:
-            print(f"Warning: Could not make User.9 layer visible: {e}")
-    
     def get_user_options(self):
         """Get grid size and check options from user"""
         try:
             import wx
             
             # Create custom dialog
-            dlg = wx.Dialog(None, title="Off-Grid Checker Options", size=(450, 400))
+            dlg = wx.Dialog(None, title="Grid Checker", size=(450, 400))
             
             # Main sizer
             main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -126,7 +108,7 @@ class CheckGridPlugin(pcbnew.ActionPlugin):
             grid_box = wx.StaticBox(dlg, label="Grid Size")
             grid_sizer = wx.StaticBoxSizer(grid_box, wx.VERTICAL)
             
-            grid_label = wx.StaticText(dlg, label="Enter grid size in mm (common values: 0.5, 0.25, 1.0):")
+            grid_label = wx.StaticText(dlg, label="Grid size in mm:")
             grid_sizer.Add(grid_label, 0, wx.ALL, 5)
             
             grid_text = wx.TextCtrl(dlg, value="0.5")
@@ -146,7 +128,7 @@ class CheckGridPlugin(pcbnew.ActionPlugin):
             component_check.SetValue(False)  # Default to unchecked
             check_sizer.Add(component_check, 0, wx.ALL, 5)
             
-            marker_check = wx.CheckBox(dlg, label="Create Visual Markers (persistent highlights)")
+            marker_check = wx.CheckBox(dlg, label="Add markers on User.9 layer")
             marker_check.SetValue(True)  # Default to checked
             check_sizer.Add(marker_check, 0, wx.ALL, 5)
             
@@ -156,11 +138,11 @@ class CheckGridPlugin(pcbnew.ActionPlugin):
             strict_box = wx.StaticBox(dlg, label="Grid Requirements")
             strict_sizer = wx.StaticBoxSizer(strict_box, wx.VERTICAL)
             
-            strict_check = wx.CheckBox(dlg, label="Require BOTH X AND Y on grid")
+            strict_check = wx.CheckBox(dlg, label="Both X and Y must be on grid (strict)")
             strict_check.SetValue(True)  # Default to strict (both coordinates must be on grid)
             strict_sizer.Add(strict_check, 0, wx.ALL, 5)
-            
-            help_text = wx.StaticText(dlg, label="Unchecked: Report items where NEITHER X nor Y is on grid\nChecked: Report items where X or Y (or both) is off grid")
+
+            help_text = wx.StaticText(dlg, label="When unchecked, only flags items where neither axis is on grid.")
             help_text.SetFont(wx.Font(8, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_ITALIC, wx.FONTWEIGHT_NORMAL))
             strict_sizer.Add(help_text, 0, wx.ALL, 5)
             
@@ -397,10 +379,6 @@ class CheckGridPlugin(pcbnew.ActionPlugin):
                 except:
                     pass
             
-            # Make User.9 layer visible if we created any markers
-            if markers_created > 0:
-                self.make_user9_visible()
-            
             # Refresh the display
             pcbnew.Refresh()
             
@@ -427,23 +405,20 @@ class CheckGridPlugin(pcbnew.ActionPlugin):
             grid_mode = "Both X and Y must be on grid" if require_both_on_grid else "At least one of X or Y must be on grid"
             
             if off_grid_items:
-                message = f"Off-Grid Items Found (Grid: {grid_size}mm):\n"
-                message += f"Mode: {grid_mode}\n\n" + "\n".join(message_parts)
-                message += f"\n\n{len(off_grid_items)} items have been selected (highlighted)."
+                message = f"Grid: {grid_size}mm ({grid_mode})\n\n"
+                message += "\n".join(message_parts)
+                message += f"\n\n{len(off_grid_items)} off-grid items selected."
                 if create_markers:
-                    message += "\n\nPersistent markers created on User.9 layer:"
-                    message += "\n• Red filled circles (0.25mm) for off-grid vias"
-                    message += "\n• Blue filled circles (0.25mm) for off-grid components"
-                    message += "\n\nMarkers will remain visible while you work!"
-                message += "\n\nCheck the console output for detailed positions."
+                    message += f"\n{markers_created} markers added to User.9 layer."
+                message += "\nEnable User.9 in the Layers panel to see them."
             else:
                 if len(all_items) == 0:
-                    message = "No items found to check!"
+                    message = "No items found to check."
                 else:
-                    message = f"Grid Check Complete (Grid: {grid_size}mm):\n"
-                    message += f"Mode: {grid_mode}\n\n" + "\n".join(message_parts)
+                    message = f"Grid: {grid_size}mm ({grid_mode})\n\n"
+                    message += "\n".join(message_parts)
             
-            self.show_message(message, "Off-Grid Vias Report")
+            self.show_message(message, "Grid Checker Results")
             
         except Exception as e:
             error_msg = f"Plugin error: {str(e)}"
