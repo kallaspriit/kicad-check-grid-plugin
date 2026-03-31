@@ -1,0 +1,23 @@
+{
+    "$schema": "https://go.kicad.org/pcm/schemas/v1",
+    "name": "Grid Checker",
+    "description": "Check vias and components against a custom grid",
+    "description_full": "Highlights vias and footprints that are not positioned on a user-defined grid (e.g. 0.5mm). Supports configurable grid size, strict/lenient checking mode, and persistent visual markers on the User.9 layer.",
+    "identifier": "com.github.kallaspriit.CheckGridPlugin",
+    "type": "plugin",
+    "author": {
+        "name": "Priit Kallas",
+        "contact": {
+            "github": "https://github.com/kallaspriit"
+        }
+    },
+    "license": "MIT",
+    "resources": {},
+    "versions": [
+        {
+            "version": "1.0.0",
+            "status": "stable",
+            "kicad_version": "9.0"
+        }
+    ]
+}
