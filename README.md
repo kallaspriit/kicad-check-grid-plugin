@@ -1,8 +1,14 @@
 # KiCad Grid Checker Plugin
 
-A KiCad 9 action plugin that checks whether vias and components are positioned on a user-defined grid.
+A KiCad action plugin that checks whether vias and components are positioned on a user-defined grid. Works with KiCad 9 and 10.
 
 ![Plugin Icon](resources/icon.png)
+
+## Screenshots
+
+| Options                              | Results                              |
+| ------------------------------------ | ------------------------------------ |
+| ![Options Dialog](screenshots/1.jpg) | ![Results Dialog](screenshots/2.jpg) |
 
 ## Features
 
@@ -14,25 +20,24 @@ A KiCad 9 action plugin that checks whether vias and components are positioned o
 
 ## Installation
 
-### Manual
+1. Download the latest `CheckGridPlugin-x.x.x.zip` from [Releases](https://github.com/kallaspriit/check-grid-plugin/releases)
+2. Open KiCad's PCB Editor
+3. Go to **Tools > Plugin and Content Manager**
+4. Click **Install from File...** at the bottom
+5. Select the downloaded zip file
+6. Restart KiCad
 
-Copy the plugin folder into your KiCad scripting plugins directory:
+### Manual Installation
 
-| OS      | Path                                          |
-| ------- | --------------------------------------------- |
-| Windows | `Documents\KiCad\9.0\scripting\plugins\`      |
-| Linux   | `~/.local/share/kicad/9.0/scripting/plugins/` |
-| macOS   | `~/Documents/KiCad/9.0/scripting/plugins/`    |
+Alternatively, extract the zip contents into your KiCad scripting plugins directory:
 
-```
-cp -r plugins/ /path/to/kicad/scripting/plugins/CheckGridPlugin/
-```
+| OS      | Path                                                          |
+| ------- | ------------------------------------------------------------- |
+| Windows | `Documents\KiCad\9.0\scripting\plugins\CheckGridPlugin\`      |
+| Linux   | `~/.local/share/kicad/9.0/scripting/plugins/CheckGridPlugin/` |
+| macOS   | `~/Documents/KiCad/9.0/scripting/plugins/CheckGridPlugin/`    |
 
-Restart KiCad's PCB editor after copying.
-
-### KiCad Plugin and Content Manager (PCM)
-
-This plugin can also be installed via the KiCad PCM if added to a PCM repository.
+Replace `9.0` with `10.0` for KiCad 10.
 
 ## Usage
 

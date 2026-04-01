@@ -12,7 +12,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Extract version from tag
         id: version
@@ -34,17 +34,17 @@ jobs:
           echo "zip_size=$(stat -c%s "$ZIP_NAME")" >> "$GITHUB_ENV"
 
       - name: Create release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ${{ env.zip_name }}
           generate_release_notes: true
           body: |
             ## Installation
 
-            ### Manual
             1. Download `${{ env.zip_name }}`
-            2. Extract into your KiCad scripting plugins directory (e.g. `Documents/KiCad/9.0/scripting/plugins/CheckGridPlugin/`)
-            3. Restart KiCad
+            2. In KiCad's PCB Editor, go to **Tools > Plugin and Content Manager**
+            3. Click **Install from File...** and select the downloaded zip
+            4. Restart KiCad
 
             ### PCM metadata
             ```
