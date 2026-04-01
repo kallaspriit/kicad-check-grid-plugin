@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Update version in metadata.json
+        run: |
+          sudo apt-get install -y jq
+          jq --arg ver "${{ steps.version.outputs.version }}" \
+            '.versions[0].version = $ver' metadata.json > metadata.tmp \
+            && mv metadata.tmp metadata.json
+
+      - name: Build PCM zip
+        run: |
+          ZIP_NAME="CheckGridPlugin-${{ steps.version.outputs.version }}.zip"
+          zip -r "$ZIP_NAME" plugins/ resources/ metadata.json
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_ENV"
+          echo "zip_sha=$(sha256sum "$ZIP_NAME" | cut -d' ' -f1)" >> "$GITHUB_ENV"
+          echo "zip_size=$(stat -c%s "$ZIP_NAME")" >> "$GITHUB_ENV"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.zip_name }}
+          generate_release_notes: true
+          body: |
+            ## Installation
+
+            ### Manual
+            1. Download `${{ env.zip_name }}`
+            2. Extract into your KiCad scripting plugins directory (e.g. `Documents/KiCad/9.0/scripting/plugins/CheckGridPlugin/`)
+            3. Restart KiCad
+
+            ### PCM metadata
+            ```
+            SHA-256: ${{ env.zip_sha }}
+            Size: ${{ env.zip_size }} bytes
+            ```
